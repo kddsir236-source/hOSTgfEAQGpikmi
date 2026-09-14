@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Своя игра — ПДД и Первая помощь</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+        }
+
+        body {
+            background: #0a1420;
+            background-image:
+                radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(213, 43, 30, 0.12) 0%, transparent 45%),
+                linear-gradient(180deg, #ffffff 0%, #ffffff 33%, #0039a6 33%, #0039a6 66%, #d52b1e 66%, #d52b1e 100%);
+            background-attachment: fixed;
+            background-blend-mode: multiply;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, #ffffff 33.3%, #0039a6 33.3%, #0039a6 66.6%, #d52b1e 66.6%);
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        .game-container {
+            max-width: 1100px;
+            width: 100%;
+            background: linear-gradient(160deg, #0e1c30 0%, #142a45 55%, #1a3355 100%);
+            border-radius: 28px;
+            box-shadow:
+                0 25px 50px rgba(0, 0, 0, 0.75),
+                0 0 0 3px #d4af37,
+                0 0 0 6px #0a1420,
+                0 0 40px rgba(212, 175, 55, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            padding: 26px 30px 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-container::before,
+        .game-container::after {
+            content: '★';
+            position: absolute;
+            font-size: 120px;
+            color: rgba(212, 175, 55, 0.05);
+            pointer-events: none;
+            line-height: 1;
+        }
+        .game-container::before { top: -30px; left: -10px; }
+        .game-container::after  { bottom: -50px; right: 0px; }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            background: linear-gradient(90deg, #0a1626 0%, #132b48 50%, #0a1626 100%);
+            padding: 14px 28px;
+            border-radius: 60px;
+            border: 2px solid #d4af37;
+            box-shadow:
+                inset 0 2px 12px rgba(0, 0, 0, 0.6),
+                0 8px 20px rgba(0, 0, 0, 0.5),
+                0 0 22px rgba(212, 175, 55, 0.2);
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(180deg, #ffffff 0%, #e8d27a 40%, #d4af37 70%, #a67c00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.45);
+        }
+
+        .logo-star {
+            font-size: 30px;
+            background: linear-gradient(180deg, #ffffff, #d4af37 50%, #a67c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.7));
+            animation: starPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes starPulse {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6)); }
+            50%      { filter: drop-shadow(0 0 16px rgba(255, 215, 0, 0.95)); }
+        }
+
+        .score-box {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            background: #081322;
+            padding: 8px 26px;
+            border-radius: 40px;
+            border: 1.5px solid #d4af37;
+            box-shadow: inset 0 0 14px rgba(212, 175, 55, 0.15);
+        }
+
+        .score-label {
+            color: #c9d9ec;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 1.5px;
+        }
+
+        .score-value {
+            font-size: 32px;
+            font-weight: 900;
+            color: #ffd966;
+            min-width: 110px;
+            text-align: right;
+            text-shadow: 0 0 14px rgba(255, 200, 50, 0.75);
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .category {
+            background: linear-gradient(180deg, #1a3a63 0%, #12294a 100%);
+            border-radius: 14px;
+            text-align: center;
+            padding: 16px 6px;
+            font-weight: 800;
+            font-size: 15px;
+            color: #f7e9b0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1.5px solid #d4af37;
+            box-shadow:
+                0 5px 0 #06101c,
+                0 8px 16px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            word-break: break-word;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 68px;
+        }
+
+        .category::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 20%;
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+            opacity: 0.6;
+        }
+
+        .cell {
+            background: linear-gradient(180deg, #1c3d66 0%, #142a4a 100%);
+            border-radius: 18px;
+            text-align: center;
+            padding: 20px 5px;
+            font-size: 28px;
+            font-weight: 900;
+            color: #ffe28c;
+            border: 1.5px solid #4a7bb5;
+            box-shadow:
+                0 6px 0 #091729,
+                0 10px 18px rgba(0, 0, 0, 0.7),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            cursor: pointer;
+            transition: all 0.1s ease;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px black;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -80%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .cell:hover:not(.answered)::before {
+            left: 120%;
+        }
+
+        .cell:hover:not(.answered) {
+            background: linear-gradient(180deg, #2d5990 0%, #1e4270 100%);
+            transform: translateY(-3px);
+            box-shadow:
+                0 9px 0 #091729,
+                0 16px 24px rgba(0, 0, 0, 0.85),
+                0 0 24px rgba(212, 175, 55, 0.4);
+            color: #fff3c4;
+            border-color: #d4af37;
+        }
+
+        .cell.answered {
+            background: #0a1522;
+            color: #33465e;
+            box-shadow: inset 0 0 0 2px #16273c, 0 3px 0 #060b12;
+            cursor: default;
+            border-color: #1d3247;
+            text-shadow: none;
+        }
+
+        .cell.answered::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 34px;
+            color: #2e4a68;
+            font-weight: 900;
+        }
+
+        .cell.answered span { display: none; }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 10, 20, 0.88);
+            backdrop-filter: blur(7px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.22s;
+        }
+
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal {
+            background: linear-gradient(160deg, #102238 0%, #162e4d 100%);
+            width: 680px;
+            max-width: 92vw;
+            border-radius: 34px;
+            padding: 30px 36px 36px;
+            border: 2.5px solid #d4af37;
+            box-shadow:
+                0 25px 70px rgba(0, 0, 0, 0.9),
+                0 0 60px rgba(212, 175, 55, 0.22),
+                inset 0 0 40px rgba(20, 50, 90, 0.5);
+            transform: scale(0.94);
+            transition: 0.18s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #ffffff 33.3%, #0039a6 33.3%, #0039a6 66.6%, #d52b1e 66.6%);
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid rgba(212, 175, 55, 0.35);
+            color: #ffd966;
+            font-weight: 700;
+            font-size: 19px;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-header span:first-child {
+            text-transform: uppercase;
+        }
+
+        .modal-header span:last-child {
+            background: #0a1626;
+            padding: 5px 20px;
+            border-radius: 40px;
+            border: 1.5px solid #d4af37;
+            color: #ffe28c;
+            font-size: 18px;
+        }
+
+        .question-text {
+            font-size: 24px;
+            font-weight: 600;
+            color: #eef6ff;
+            line-height: 1.45;
+            margin-bottom: 30px;
+            min-height: 100px;
+            text-align: center;
+            word-break: break-word;
+            text-shadow: 0 2px 6px black;
+        }
+
+        .answers-list {
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+            margin-bottom: 14px;
+        }
+
+        .answer-btn {
+            background: linear-gradient(180deg, #1e3c5e 0%, #16304d 100%);
+            border: 1.5px solid #5f8bb0;
+            color: #dcecff;
+            padding: 16px 22px;
+            border-radius: 60px;
+            font-size: 18px;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.12s;
+            box-shadow: 0 4px 0 #0a1728, 0 6px 12px rgba(0, 0, 0, 0.4);
+            letter-spacing: 0.3px;
+            position: relative;
+        }
+
+        .answer-btn:hover:not(:disabled) {
+            background: linear-gradient(180deg, #2c5580 0%, #204270 100%);
+            border-color: #d4af37;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #0a1728, 0 10px 18px rgba(0, 0, 0, 0.55);
+            color: #fff6d8;
+        }
+
+        .answer-btn.correct {
+            background: linear-gradient(180deg, #1e7e34 0%, #14621f 100%);
+            border-color: #9bff9b;
+            color: white;
+            box-shadow: 0 4px 0 #0b2a12, 0 0 22px rgba(60, 255, 100, 0.4);
+        }
+
+        .answer-btn.wrong {
+            background: linear-gradient(180deg, #992020 0%, #7a1414 100%);
+            border-color: #ff9e9e;
+            color: white;
+            box-shadow: 0 4px 0 #3d0a0a, 0 0 22px rgba(255, 60, 60, 0.35);
+        }
+
+        .answer-btn:disabled {
+            cursor: default;
+            opacity: 0.85;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 22px;
+        }
+
+        .next-btn {
+            background: linear-gradient(180deg, #ffd966 0%, #d4af37 55%, #b8860b 100%);
+            border: none;
+            color: #0a1420;
+            font-weight: 900;
+            padding: 15px 42px;
+            border-radius: 40px;
+            font-size: 18px;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            box-shadow:
+                0 6px 0 #7a5900,
+                0 10px 22px rgba(0, 0, 0, 0.75),
+                0 0 24px rgba(212, 175, 55, 0.4);
+            transition: 0.1s;
+            text-transform: uppercase;
+        }
+
+        .next-btn:hover:not(:disabled) {
+            background: linear-gradient(180deg, #ffe28c 0%, #e6bf3a 55%, #c9971b 100%);
+            transform: translateY(-2px);
+            box-shadow:
+                0 8px 0 #7a5900,
+                0 14px 26px rgba(0, 0, 0, 0.8),
+                0 0 34px rgba(212, 175, 55, 0.6);
+        }
+
+        .next-btn:disabled {
+            opacity: 0.35;
+            cursor: default;
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #7a5900;
+        }
+
+        .hint {
+            text-align: center;
+            font-size: 12.5px;
+            color: #6d8bb0;
+            letter-spacing: 0.8px;
+            margin-top: 14px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hint b {
+            color: #d4af37;
+        }
+
+        @media (max-width: 620px) {
+            .game-container { padding: 16px 14px 22px; }
+            .logo { font-size: 15px; letter-spacing: 1px; }
+            .logo-star { font-size: 22px; }
+            .score-box { padding: 6px 16px; gap: 10px; }
+            .score-value { font-size: 24px; min-width: 70px; }
+            .category { font-size: 11px; letter-spacing: 0.3px; padding: 10px 3px; min-height: 58px; }
+            .cell { font-size: 22px; padding: 16px 3px; }
+            .question-text { font-size: 19px; }
+            .answer-btn { font-size: 15px; padding: 13px 16px; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="header">
+        <div class="logo">
+            <span class="logo-star">★</span>
+            СВОЯ ИГРА · ПДД
+        </div>
+        <div class="score-box">
+            <span class="score-label">Счёт</span>
+            <span class="score-value" id="scoreDisplay">0</span>
+        </div>
+    </div>
+
+    <div class="board" id="board"></div>
+
+    <div class="hint">Двойной клик по логотипу — <b>новая игра</b></div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <span id="modalCategory">Категория</span>
+            <span id="modalPrice">100</span>
+        </div>
+        <div class="question-text" id="questionText">Текст вопроса</div>
+        <div class="answers-list" id="answersList"></div>
+        <div class="modal-footer">
+            <button class="next-btn" id="nextBtn" disabled>Далее</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- 4 ТЕМЫ: ПДД + ПЕРВАЯ ПОМОЩЬ ----------
+    const categories = [
+        {
+            name: "Общие правила ПДД",
+            questions: [
+                { price: 100, question: "Какой сигнал светофора разрешает движение?", answers: ["Красный", "Жёлтый", "Зелёный", "Синий"], correct: 2 },
+                { price: 200, question: "Что означает жёлтый сигнал светофора?", answers: ["Можно ехать", "Приготовиться — скоро сменится", "Стой навсегда", "Пешеходам можно идти"], correct: 1 },
+                { price: 300, question: "С какого возраста детям разрешено ездить на велосипеде по проезжей части?", answers: ["С 7 лет", "С 10 лет", "С 14 лет", "С 18 лет"], correct: 2 },
+                { price: 400, question: "Что запрещено делать водителю, даже если очень спешит?", answers: ["Включать поворотник", "Превышать скорость", "Пристёгиваться", "Уступать пешеходам"], correct: 1 }
+            ]
+        },
+        {
+            name: "Правила для пешеходов",
+            questions: [
+                { price: 100, question: "Где пешеход должен переходить дорогу?", answers: ["В любом месте", "По пешеходному переходу", "На красный свет", "Между машинами"], correct: 1 },
+                { price: 200, question: "Что нужно сделать перед переходом дороги?", answers: ["Побежать", "Посмотреть по сторонам", "Закрыть глаза", "Помахать рукой"], correct: 1 },
+                { price: 300, question: "Как называется переход со светофором?", answers: ["Нерегулируемый", "Регулируемый", "Подземный", "Надземный"], correct: 1 },
+                { price: 400, question: "Можно ли отвлекаться на телефон при переходе дороги?", answers: ["Да, если быстро", "Да, если дорога пустая", "Нет, это опасно", "Только в наушниках"], correct: 2 }
+            ]
+        },
+        {
+            name: "Питбайки и мото",
+            questions: [
+                { price: 100, question: "С какого возраста можно ездить на питбайке по дорогам общего пользования?", answers: ["С 10 лет", "С 14 лет", "С 16 лет", "Запрещено без прав"], correct: 3 },
+                { price: 200, question: "Что обязательно нужно надеть при езде на питбайке?", answers: ["Кепку", "Шлем", "Очки", "Перчатки"], correct: 1 },
+                { price: 300, question: "Где можно безопасно кататься на питбайке?", answers: ["На трассе", "Во дворе", "На специальной площадке", "На тротуаре"], correct: 2 },
+                { price: 400, question: "Что нужно иметь для управления питбайком по дорогам?", answers: ["Ничего", "Права категории M или A", "Только шлем", "Разрешение родителей"], correct: 1 }
+            ]
+        },
+        {
+            name: "Первая помощь",
+            questions: [
+                { price: 100, question: "Какой номер нужно набрать, чтобы вызвать скорую помощь?", answers: ["101", "102", "103", "112"], correct: 2 },
+                { price: 200, question: "Что нужно сделать в первую очередь при ДТП?", answers: ["Сфотографировать", "Вызвать скорую и ГИБДД", "Уехать", "Заснять видео"], correct: 1 },
+                { price: 300, question: "Как остановить сильное кровотечение из раны?", answers: ["Полить водой", "Наложить жгут или давящую повязку", "Заклеить пластырем", "Подуть на рану"], correct: 1 },
+                { price: 400, question: "Что делать, если человек без сознания и не дышит?", answers: ["Дать воды", "Сделать искусственное дыхание и массаж сердца", "Усадить его", "Ждать скорую"], correct: 1 }
+            ]
+        }
+    ];
+
+    let score = 0;
+    let answeredCells = new Set();
+    let currentQuestion = null;
+
+    const boardEl = document.getElementById('board');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalCategory = document.getElementById('modalCategory');
+    const modalPrice = document.getElementById('modalPrice');
+    const questionText = document.getElementById('questionText');
+    const answersList = document.getElementById('answersList');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function renderBoard() {
+        boardEl.innerHTML = '';
+
+        categories.forEach(cat => {
+            const catDiv = document.createElement('div');
+            catDiv.className = 'category';
+            catDiv.textContent = cat.name;
+            boardEl.appendChild(catDiv);
+        });
+
+        for (let row = 0; row < 4; row++) {
+            for (let col = 0; col < categories.length; col++) {
+                const question = categories[col].questions[row];
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                const cellId = `${row}-${col}`;
+
+                if (answeredCells.has(cellId)) {
+                    cell.classList.add('answered');
+                } else {
+                    cell.innerHTML = `<span>${question.price}</span>`;
+                }
+
+                cell.addEventListener('click', () => {
+                    if (answeredCells.has(cellId)) return;
+                    openQuestion(row, col);
+                });
+
+                boardEl.appendChild(cell);
+            }
+        }
+    }
+
+    function openQuestion(row, col) {
+        const category = categories[col];
+        const question = category.questions[row];
+
+        currentQuestion = {
+            row, col,
+            price: question.price,
+            question: question.question,
+            answers: question.answers,
+            correct: question.correct,
+            answered: false
+        };
+
+        modalCategory.textContent = category.name;
+        modalPrice.textContent = question.price;
+        questionText.textContent = question.question;
+
+        answersList.innerHTML = '';
+        question.answers.forEach((answer, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'answer-btn';
+            btn.textContent = answer;
+            btn.dataset.index = idx;
+            btn.addEventListener('click', () => selectAnswer(idx, btn));
+            answersList.appendChild(btn);
+        });
+
+        nextBtn.disabled = true;
+        nextBtn.textContent = 'Далее';
+
+        modalOverlay.classList.add('active');
+        window.currentAnswerButtons = Array.from(answersList.children);
+    }
+
+    function selectAnswer(selectedIndex, btnEl) {
+        if (!currentQuestion || currentQuestion.answered) return;
+
+        const allButtons = window.currentAnswerButtons;
+        const correctIndex = currentQuestion.correct;
+
+        allButtons.forEach(btn => btn.disabled = true);
+        allButtons[correctIndex].classList.add('correct');
+
+        if (selectedIndex === correctIndex) {
+            score += currentQuestion.price;
+            scoreDisplay.textContent = score;
+        } else {
+            score -= currentQuestion.price;
+            scoreDisplay.textContent = score;
+            btnEl.classList.add('wrong');
+        }
+
+        currentQuestion.answered = true;
+        nextBtn.disabled = false;
+    }
+
+    function closeQuestion() {
+        if (!currentQuestion) return;
+        answeredCells.add(`${currentQuestion.row}-${currentQuestion.col}`);
+        renderBoard();
+        modalOverlay.classList.remove('active');
+        currentQuestion = null;
+
+        if (answeredCells.size === 16) {
+            setTimeout(() => {
+                const msg = score >= 0
+                    ? `Молодец! Ты знаешь ПДД и первую помощь! Итоговый счёт: ${score}`
+                    : `Игра завершена. Итоговый счёт: ${score}. Повтори правила!`;
+                alert(msg);
+            }, 150);
+        }
+    }
+
+    function resetGame() {
+        score = 0;
+        answeredCells.clear();
+        currentQuestion = null;
+        scoreDisplay.textContent = '0';
+        renderBoard();
+        modalOverlay.classList.remove('active');
+    }
+
+    nextBtn.addEventListener('click', closeQuestion);
+
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay && currentQuestion && currentQuestion.answered) {
+            closeQuestion();
+        }
+    });
+
+    document.querySelector('.logo').addEventListener('dblclick', () => {
+        if (confirm('Начать новую игру? Текущий прогресс будет сброшен.')) {
+            resetGame();
+        }
+    });
+
+    renderBoard();
+</script>
+</body>
+</html>
