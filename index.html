@@ -3,21 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Своя игра — ПДД и Первая помощь</title>
+<title>Своя игра — ПДД и Первая помощь | Патриотическая версия</title>
 <style>
   :root {
-    --bg-0: #070d17;
-    --bg-1: #0d1626;
-    --bg-2: #142338;
-    --panel: linear-gradient(165deg, #0f1d31 0%, #162b47 60%, #1b3457 100%);
+    /* Патриотическая палитра: триколор + золото + глубокий синий */
+    --bg-0: #0a0f1a;
+    --bg-1: #0e1628;
+    --bg-2: #14233c;
+    --panel: linear-gradient(165deg, #0f1d31 0%, #16304d 60%, #1b3a5e 100%);
     --gold: #d4af37;
     --gold-light: #ffd966;
     --gold-dark: #8a6d1a;
-    --text: #e8f0fb;
+    --text: #f0f5ff;
     --muted: #8fa9c9;
-    --blue: #2f6fb5;
-    --green: #1f8a3b;
-    --red: #b32a2a;
+    --blue: #0039a6;
+    --red: #d52b1e;
+    --white: #ffffff;
     --radius-lg: 26px;
     --radius-md: 16px;
     --radius-sm: 12px;
@@ -35,9 +36,12 @@
   body {
     font-family: 'Segoe UI', Roboto, system-ui, Arial, sans-serif;
     background:
-      radial-gradient(circle at 15% 15%, rgba(255,255,255,.06), transparent 45%),
-      radial-gradient(circle at 85% 85%, rgba(213,43,30,.14), transparent 45%),
-      linear-gradient(180deg, #fff 0 33%, #0039a6 33% 66%, #d52b1e 66% 100%);
+      /* Патриотические лучи и орнаменты */
+      radial-gradient(circle at 10% 20%, rgba(255,255,255,.08), transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(213,43,30,.18), transparent 45%),
+      radial-gradient(circle at 30% 70%, rgba(0,57,166,.15), transparent 50%),
+      /* Триколор: белый, синий, красный */
+      linear-gradient(180deg, #ffffff 0 33%, #0039a6 33% 66%, #d52b1e 66% 100%);
     background-attachment: fixed;
     background-blend-mode: multiply;
     background-color: var(--bg-0);
@@ -50,13 +54,27 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* Верхняя полоса-триколор */
   body::before {
     content: '';
     position: fixed; inset: 0 0 auto 0;
-    height: 6px;
-    background: linear-gradient(90deg, #fff 33.3%, #0039a6 33.3% 66.6%, #d52b1e 66.6%);
+    height: 8px;
+    background: linear-gradient(90deg, #ffffff 33.3%, #0039a6 33.3% 66.6%, #d52b1e 66.6%);
     z-index: 100;
-    box-shadow: 0 2px 10px rgba(0,0,0,.6);
+    box-shadow: 0 2px 12px rgba(0,0,0,.8);
+  }
+
+  /* Декоративная звезда-орнамент на фоне */
+  body::after {
+    content: '★';
+    position: fixed;
+    bottom: -40px; right: -40px;
+    font-size: 320px;
+    color: rgba(212,175,55,.03);
+    pointer-events: none;
+    z-index: 0;
+    transform: rotate(15deg);
+    line-height: 1;
   }
 
   /* ===== Layout ===== */
@@ -67,6 +85,8 @@
     max-width: 1600px;
     height: 92vh;
     max-height: 900px;
+    position: relative;
+    z-index: 2;
   }
 
   /* ===== Board ===== */
@@ -81,6 +101,7 @@
     flex-direction: column;
     position: relative;
     overflow: hidden;
+    border: 1px solid rgba(212,175,55,.3);
   }
 
   .board-side::before {
@@ -88,9 +109,22 @@
     position: absolute;
     top: -50px; left: -25px;
     font-size: 180px;
-    color: rgba(212,175,55,.05);
+    color: rgba(212,175,55,.06);
     pointer-events: none;
     line-height: 1;
+  }
+
+  /* Патриотический орнамент */
+  .board-side::after {
+    content: '';
+    position: absolute;
+    bottom: 10px; right: 10px;
+    width: 80px; height: 80px;
+    background:
+      radial-gradient(circle, var(--gold) 1px, transparent 2px);
+    background-size: 12px 12px;
+    opacity: .08;
+    pointer-events: none;
   }
 
   .board-title {
@@ -101,9 +135,21 @@
     font-size: 13px;
     text-transform: uppercase;
     margin-bottom: 14px;
-    opacity: .85;
+    opacity: .9;
     position: relative;
     z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .board-title::before,
+  .board-title::after {
+    content: '★';
+    color: var(--gold);
+    font-size: 10px;
+    opacity: .7;
   }
 
   .board {
@@ -134,6 +180,17 @@
     justify-content: center;
     min-height: 52px;
     word-break: break-word;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .category::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #ffffff 33.3%, #0039a6 33.3% 66.6%, #d52b1e 66.6%);
+    opacity: .7;
   }
 
   .cell {
@@ -222,6 +279,7 @@
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-panel);
     padding: 20px;
+    border: 1px solid rgba(212,175,55,.25);
   }
 
   .panel-card::before {
@@ -229,9 +287,19 @@
     position: absolute;
     bottom: -35px; right: -25px;
     font-size: 120px;
-    color: rgba(212,175,55,.05);
+    color: rgba(212,175,55,.06);
     line-height: 1;
     pointer-events: none;
+  }
+
+  /* Триколорная полоска на карточках */
+  .panel-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #ffffff 33.3%, #0039a6 33.3% 66.6%, #d52b1e 66.6%);
+    opacity: .8;
   }
 
   .logo-card { text-align: center; padding: 22px 16px; }
@@ -430,7 +498,7 @@
     max-width: 100%;
     max-height: 94vh;
     overflow-y: auto;
-    background: linear-gradient(160deg, #102238 0%, #162e4d 100%);
+    background: linear-gradient(160deg, #102238 0%, #16304d 100%);
     border: 2.5px solid var(--gold);
     border-radius: 32px;
     padding: 26px 32px 32px;
@@ -448,7 +516,7 @@
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 5px;
-    background: linear-gradient(90deg, #fff 33.3%, #0039a6 33.3% 66.6%, #d52b1e 66.6%);
+    background: linear-gradient(90deg, #ffffff 33.3%, #0039a6 33.3% 66.6%, #d52b1e 66.6%);
     border-radius: 32px 32px 0 0;
   }
 
@@ -692,7 +760,7 @@
 <div class="game-wrapper">
   <!-- Игровое поле -->
   <div class="board-side">
-    <div class="board-title">★ Игровое поле ★</div>
+    <div class="board-title">Игровое поле</div>
     <div class="board" id="board" role="grid" aria-label="Игровое поле"></div>
   </div>
 
@@ -1028,7 +1096,6 @@
     modalOverlay.classList.add('active');
     modalOverlay.setAttribute('aria-hidden', 'false');
 
-    // фокус на первую кнопку
     setTimeout(() => {
       const first = answersList.querySelector('.answer-btn');
       if (first) first.focus();
@@ -1150,7 +1217,6 @@
     modalOverlay.classList.remove('active');
     modalOverlay.setAttribute('aria-hidden', 'true');
 
-    // восстановим дефолтный футер
     nextBtn.onclick = null;
     nextBtn.textContent = 'Далее';
     nextBtn.disabled = true;
