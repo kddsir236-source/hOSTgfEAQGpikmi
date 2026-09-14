@@ -1,682 +1,1197 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Своя игра — ПДД и Первая помощь</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Своя игра — ПДД и Первая помощь</title>
+<style>
+  :root {
+    --bg-0: #070d17;
+    --bg-1: #0d1626;
+    --bg-2: #142338;
+    --panel: linear-gradient(165deg, #0f1d31 0%, #162b47 60%, #1b3457 100%);
+    --gold: #d4af37;
+    --gold-light: #ffd966;
+    --gold-dark: #8a6d1a;
+    --text: #e8f0fb;
+    --muted: #8fa9c9;
+    --blue: #2f6fb5;
+    --green: #1f8a3b;
+    --red: #b32a2a;
+    --radius-lg: 26px;
+    --radius-md: 16px;
+    --radius-sm: 12px;
+    --shadow-panel: 0 22px 45px rgba(0,0,0,.65),
+                    0 0 0 3px var(--gold),
+                    0 0 0 6px var(--bg-0),
+                    0 0 40px rgba(212,175,55,.22);
+    --shadow-btn: 0 5px 0 #06101c, 0 8px 16px rgba(0,0,0,.55);
+  }
 
-        body {
-            background: #0a1420;
-            background-image:
-                radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 40%),
-                radial-gradient(circle at 85% 80%, rgba(213, 43, 30, 0.12) 0%, transparent 45%),
-                linear-gradient(180deg, #ffffff 0%, #ffffff 33%, #0039a6 33%, #0039a6 66%, #d52b1e 66%, #d52b1e 100%);
-            background-attachment: fixed;
-            background-blend-mode: multiply;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            position: relative;
-        }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 8px;
-            background: linear-gradient(90deg, #ffffff 33.3%, #0039a6 33.3%, #0039a6 66.6%, #d52b1e 66.6%);
-            z-index: 100;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-        }
+  html, body { height: 100%; }
 
-        .game-container {
-            max-width: 1100px;
-            width: 100%;
-            background: linear-gradient(160deg, #0e1c30 0%, #142a45 55%, #1a3355 100%);
-            border-radius: 28px;
-            box-shadow:
-                0 25px 50px rgba(0, 0, 0, 0.75),
-                0 0 0 3px #d4af37,
-                0 0 0 6px #0a1420,
-                0 0 40px rgba(212, 175, 55, 0.25),
-                inset 0 1px 0 rgba(255, 255, 255, 0.08);
-            padding: 26px 30px 32px;
-            position: relative;
-            overflow: hidden;
-        }
+  body {
+    font-family: 'Segoe UI', Roboto, system-ui, Arial, sans-serif;
+    background:
+      radial-gradient(circle at 15% 15%, rgba(255,255,255,.06), transparent 45%),
+      radial-gradient(circle at 85% 85%, rgba(213,43,30,.14), transparent 45%),
+      linear-gradient(180deg, #fff 0 33%, #0039a6 33% 66%, #d52b1e 66% 100%);
+    background-attachment: fixed;
+    background-blend-mode: multiply;
+    background-color: var(--bg-0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    overflow-x: hidden;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
 
-        .game-container::before,
-        .game-container::after {
-            content: '★';
-            position: absolute;
-            font-size: 120px;
-            color: rgba(212, 175, 55, 0.05);
-            pointer-events: none;
-            line-height: 1;
-        }
-        .game-container::before { top: -30px; left: -10px; }
-        .game-container::after  { bottom: -50px; right: 0px; }
+  body::before {
+    content: '';
+    position: fixed; inset: 0 0 auto 0;
+    height: 6px;
+    background: linear-gradient(90deg, #fff 33.3%, #0039a6 33.3% 66.6%, #d52b1e 66.6%);
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,.6);
+  }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 28px;
-            background: linear-gradient(90deg, #0a1626 0%, #132b48 50%, #0a1626 100%);
-            padding: 14px 28px;
-            border-radius: 60px;
-            border: 2px solid #d4af37;
-            box-shadow:
-                inset 0 2px 12px rgba(0, 0, 0, 0.6),
-                0 8px 20px rgba(0, 0, 0, 0.5),
-                0 0 22px rgba(212, 175, 55, 0.2);
-            position: relative;
-            z-index: 2;
-        }
+  /* ===== Layout ===== */
+  .game-wrapper {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    max-width: 1600px;
+    height: 92vh;
+    max-height: 900px;
+  }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 22px;
-            font-weight: 900;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            background: linear-gradient(180deg, #ffffff 0%, #e8d27a 40%, #d4af37 70%, #a67c00 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(212, 175, 55, 0.45);
-        }
+  /* ===== Board ===== */
+  .board-side {
+    flex: 1;
+    min-width: 0;
+    background: var(--panel);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-panel);
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
 
-        .logo-star {
-            font-size: 30px;
-            background: linear-gradient(180deg, #ffffff, #d4af37 50%, #a67c00);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.7));
-            animation: starPulse 3s ease-in-out infinite;
-        }
+  .board-side::before {
+    content: '★';
+    position: absolute;
+    top: -50px; left: -25px;
+    font-size: 180px;
+    color: rgba(212,175,55,.05);
+    pointer-events: none;
+    line-height: 1;
+  }
 
-        @keyframes starPulse {
-            0%, 100% { filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6)); }
-            50%      { filter: drop-shadow(0 0 16px rgba(255, 215, 0, 0.95)); }
-        }
+  .board-title {
+    text-align: center;
+    color: var(--gold);
+    font-weight: 700;
+    letter-spacing: 4px;
+    font-size: 13px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    opacity: .85;
+    position: relative;
+    z-index: 2;
+  }
 
-        .score-box {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            background: #081322;
-            padding: 8px 26px;
-            border-radius: 40px;
-            border: 1.5px solid #d4af37;
-            box-shadow: inset 0 0 14px rgba(212, 175, 55, 0.15);
-        }
+  .board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto repeat(4, 1fr);
+    gap: 12px;
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    z-index: 2;
+  }
 
-        .score-label {
-            color: #c9d9ec;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 14px;
-            letter-spacing: 1.5px;
-        }
+  .category {
+    background: linear-gradient(180deg, #1a3a63 0%, #12294a 100%);
+    border-radius: var(--radius-sm);
+    text-align: center;
+    padding: 10px 6px;
+    font-weight: 800;
+    font-size: 13px;
+    color: #f7e9b0;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    border: 1.5px solid var(--gold);
+    box-shadow: var(--shadow-btn);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    word-break: break-word;
+  }
 
-        .score-value {
-            font-size: 32px;
-            font-weight: 900;
-            color: #ffd966;
-            min-width: 110px;
-            text-align: right;
-            text-shadow: 0 0 14px rgba(255, 200, 50, 0.75);
-        }
+  .cell {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #1c3d66 0%, #142a4a 100%);
+    border-radius: var(--radius-md);
+    border: 1.5px solid #4a7bb5;
+    box-shadow: var(--shadow-btn);
+    font-size: 26px;
+    font-weight: 900;
+    color: #ffe28c;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px #000;
+    cursor: pointer;
+    transition: transform .12s ease, background .12s ease,
+                box-shadow .12s ease, border-color .12s ease;
+  }
 
-        .board {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 14px;
-            margin-bottom: 8px;
-            position: relative;
-            z-index: 2;
-        }
+  .cell::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -80%;
+    width: 60%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,.2), transparent);
+    transition: left .55s ease;
+  }
 
-        .category {
-            background: linear-gradient(180deg, #1a3a63 0%, #12294a 100%);
-            border-radius: 14px;
-            text-align: center;
-            padding: 16px 6px;
-            font-weight: 800;
-            font-size: 15px;
-            color: #f7e9b0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border: 1.5px solid #d4af37;
-            box-shadow:
-                0 5px 0 #06101c,
-                0 8px 16px rgba(0, 0, 0, 0.6),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            word-break: break-word;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 68px;
-        }
+  .cell:hover:not(.answered)::before { left: 120%; }
 
-        .category::after {
-            content: '';
-            position: absolute;
-            bottom: 4px;
-            left: 20%;
-            width: 60%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #d4af37, transparent);
-            opacity: 0.6;
-        }
+  .cell:hover:not(.answered) {
+    background: linear-gradient(180deg, #2d5990 0%, #1e4270 100%);
+    border-color: var(--gold);
+    color: #fff3c4;
+    transform: translateY(-3px);
+    box-shadow:
+      0 8px 0 #091729,
+      0 14px 22px rgba(0,0,0,.85),
+      0 0 24px rgba(212,175,55,.4);
+  }
 
-        .cell {
-            background: linear-gradient(180deg, #1c3d66 0%, #142a4a 100%);
-            border-radius: 18px;
-            text-align: center;
-            padding: 20px 5px;
-            font-size: 28px;
-            font-weight: 900;
-            color: #ffe28c;
-            border: 1.5px solid #4a7bb5;
-            box-shadow:
-                0 6px 0 #091729,
-                0 10px 18px rgba(0, 0, 0, 0.7),
-                inset 0 1px 0 rgba(255, 255, 255, 0.12);
-            cursor: pointer;
-            transition: all 0.1s ease;
-            letter-spacing: 1px;
-            text-shadow: 0 2px 4px black;
-            position: relative;
-            overflow: hidden;
-        }
+  .cell:focus-visible {
+    outline: 2px solid var(--gold-light);
+    outline-offset: 3px;
+  }
 
-        .cell::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -80%;
-            width: 60%;
-            height: 100%;
-            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.18), transparent);
-            transition: left 0.5s ease;
-        }
+  .cell.answered {
+    background: #0a1522;
+    border-color: #1d3247;
+    color: #33465e;
+    box-shadow: inset 0 0 0 2px #16273c, 0 3px 0 #060b12;
+    cursor: default;
+    text-shadow: none;
+  }
 
-        .cell:hover:not(.answered)::before {
-            left: 120%;
-        }
+  .cell.answered::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: #2e4a68;
+    font-weight: 900;
+  }
 
-        .cell:hover:not(.answered) {
-            background: linear-gradient(180deg, #2d5990 0%, #1e4270 100%);
-            transform: translateY(-3px);
-            box-shadow:
-                0 9px 0 #091729,
-                0 16px 24px rgba(0, 0, 0, 0.85),
-                0 0 24px rgba(212, 175, 55, 0.4);
-            color: #fff3c4;
-            border-color: #d4af37;
-        }
+  .cell.answered span { display: none; }
 
-        .cell.answered {
-            background: #0a1522;
-            color: #33465e;
-            box-shadow: inset 0 0 0 2px #16273c, 0 3px 0 #060b12;
-            cursor: default;
-            border-color: #1d3247;
-            text-shadow: none;
-        }
+  /* ===== Side panel ===== */
+  .panel-side {
+    width: 290px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
 
-        .cell.answered::after {
-            content: '✓';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 34px;
-            color: #2e4a68;
-            font-weight: 900;
-        }
+  .panel-card {
+    position: relative;
+    overflow: hidden;
+    background: var(--panel);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-panel);
+    padding: 20px;
+  }
 
-        .cell.answered span { display: none; }
+  .panel-card::before {
+    content: '★';
+    position: absolute;
+    bottom: -35px; right: -25px;
+    font-size: 120px;
+    color: rgba(212,175,55,.05);
+    line-height: 1;
+    pointer-events: none;
+  }
 
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(3, 10, 20, 0.88);
-            backdrop-filter: blur(7px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            visibility: hidden;
-            opacity: 0;
-            transition: 0.22s;
-        }
+  .logo-card { text-align: center; padding: 22px 16px; }
 
-        .modal-overlay.active {
-            visibility: visible;
-            opacity: 1;
-        }
+  .logo-star {
+    display: block;
+    font-size: 46px;
+    margin-bottom: 8px;
+    background: linear-gradient(180deg, #fff, var(--gold) 50%, var(--gold-dark));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 12px rgba(212,175,55,.8));
+    animation: starPulse 3s ease-in-out infinite;
+    position: relative; z-index: 2;
+  }
 
-        .modal {
-            background: linear-gradient(160deg, #102238 0%, #162e4d 100%);
-            width: 680px;
-            max-width: 92vw;
-            border-radius: 34px;
-            padding: 30px 36px 36px;
-            border: 2.5px solid #d4af37;
-            box-shadow:
-                0 25px 70px rgba(0, 0, 0, 0.9),
-                0 0 60px rgba(212, 175, 55, 0.22),
-                inset 0 0 40px rgba(20, 50, 90, 0.5);
-            transform: scale(0.94);
-            transition: 0.18s ease;
-            position: relative;
-            overflow: hidden;
-        }
+  @keyframes starPulse {
+    0%, 100% { filter: drop-shadow(0 0 6px rgba(212,175,55,.6)); }
+    50%      { filter: drop-shadow(0 0 20px rgba(255,215,0,.95)); }
+  }
 
-        .modal::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, #ffffff 33.3%, #0039a6 33.3%, #0039a6 66.6%, #d52b1e 66.6%);
-        }
+  .logo-text {
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    line-height: 1.15;
+    background: linear-gradient(180deg, #fff 0%, #e8d27a 40%, var(--gold) 70%, var(--gold-dark) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative; z-index: 2;
+  }
 
-        .modal-overlay.active .modal {
-            transform: scale(1);
-        }
+  .logo-sub {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #7ea3cc;
+    margin-top: 6px;
+    text-transform: uppercase;
+    position: relative; z-index: 2;
+  }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 14px;
-            border-bottom: 2px solid rgba(212, 175, 55, 0.35);
-            color: #ffd966;
-            font-weight: 700;
-            font-size: 19px;
-            letter-spacing: 0.5px;
-        }
+  .score-card { text-align: center; padding: 18px 16px; }
 
-        .modal-header span:first-child {
-            text-transform: uppercase;
-        }
+  .score-label {
+    color: #c9d9ec;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    position: relative; z-index: 2;
+  }
 
-        .modal-header span:last-child {
-            background: #0a1626;
-            padding: 5px 20px;
-            border-radius: 40px;
-            border: 1.5px solid #d4af37;
-            color: #ffe28c;
-            font-size: 18px;
-        }
+  .score-value {
+    font-size: 46px;
+    font-weight: 900;
+    color: var(--gold-light);
+    text-shadow: 0 0 20px rgba(255,200,50,.8);
+    line-height: 1;
+    position: relative; z-index: 2;
+  }
 
-        .question-text {
-            font-size: 24px;
-            font-weight: 600;
-            color: #eef6ff;
-            line-height: 1.45;
-            margin-bottom: 30px;
-            min-height: 100px;
-            text-align: center;
-            word-break: break-word;
-            text-shadow: 0 2px 6px black;
-        }
+  .progress-card { padding: 16px 20px; }
 
-        .answers-list {
-            display: flex;
-            flex-direction: column;
-            gap: 13px;
-            margin-bottom: 14px;
-        }
+  .progress-title {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    position: relative; z-index: 2;
+  }
 
-        .answer-btn {
-            background: linear-gradient(180deg, #1e3c5e 0%, #16304d 100%);
-            border: 1.5px solid #5f8bb0;
-            color: #dcecff;
-            padding: 16px 22px;
-            border-radius: 60px;
-            font-size: 18px;
-            font-weight: 500;
-            text-align: left;
-            cursor: pointer;
-            transition: 0.12s;
-            box-shadow: 0 4px 0 #0a1728, 0 6px 12px rgba(0, 0, 0, 0.4);
-            letter-spacing: 0.3px;
-            position: relative;
-        }
+  .progress-track {
+    height: 8px;
+    background: #0a1522;
+    border-radius: 99px;
+    overflow: hidden;
+    position: relative; z-index: 2;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,.8);
+  }
 
-        .answer-btn:hover:not(:disabled) {
-            background: linear-gradient(180deg, #2c5580 0%, #204270 100%);
-            border-color: #d4af37;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 0 #0a1728, 0 10px 18px rgba(0, 0, 0, 0.55);
-            color: #fff6d8;
-        }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light));
+    border-radius: 99px;
+    transition: width .35s ease;
+    box-shadow: 0 0 12px rgba(212,175,55,.7);
+  }
 
-        .answer-btn.correct {
-            background: linear-gradient(180deg, #1e7e34 0%, #14621f 100%);
-            border-color: #9bff9b;
-            color: white;
-            box-shadow: 0 4px 0 #0b2a12, 0 0 22px rgba(60, 255, 100, 0.4);
-        }
+  .tips-card { padding: 18px 20px; }
 
-        .answer-btn.wrong {
-            background: linear-gradient(180deg, #992020 0%, #7a1414 100%);
-            border-color: #ff9e9e;
-            color: white;
-            box-shadow: 0 4px 0 #3d0a0a, 0 0 22px rgba(255, 60, 60, 0.35);
-        }
+  .tips-title {
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    text-align: center;
+    position: relative; z-index: 2;
+  }
 
-        .answer-btn:disabled {
-            cursor: default;
-            opacity: 0.85;
-        }
+  .tip {
+    display: flex;
+    gap: 8px;
+    color: #b8cde3;
+    font-size: 12.5px;
+    line-height: 1.4;
+    margin-bottom: 9px;
+    position: relative; z-index: 2;
+  }
+  .tip:last-child { margin-bottom: 0; }
+  .tip b { color: var(--gold-light); }
+  .tip-icon { color: var(--gold); font-weight: 900; flex-shrink: 0; }
 
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 22px;
-        }
+  .newgame-card {
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: auto;
+  }
 
-        .next-btn {
-            background: linear-gradient(180deg, #ffd966 0%, #d4af37 55%, #b8860b 100%);
-            border: none;
-            color: #0a1420;
-            font-weight: 900;
-            padding: 15px 42px;
-            border-radius: 40px;
-            font-size: 18px;
-            letter-spacing: 1.5px;
-            cursor: pointer;
-            box-shadow:
-                0 6px 0 #7a5900,
-                0 10px 22px rgba(0, 0, 0, 0.75),
-                0 0 24px rgba(212, 175, 55, 0.4);
-            transition: 0.1s;
-            text-transform: uppercase;
-        }
+  .btn-gold {
+    width: 100%;
+    border: none;
+    cursor: pointer;
+    color: #0a1420;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-radius: 40px;
+    background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 55%, var(--gold-dark) 100%);
+    box-shadow:
+      0 5px 0 #7a5900,
+      0 8px 18px rgba(0,0,0,.7),
+      0 0 20px rgba(212,175,55,.35);
+    transition: transform .1s ease, box-shadow .1s ease, background .1s ease;
+    position: relative; z-index: 2;
+  }
 
-        .next-btn:hover:not(:disabled) {
-            background: linear-gradient(180deg, #ffe28c 0%, #e6bf3a 55%, #c9971b 100%);
-            transform: translateY(-2px);
-            box-shadow:
-                0 8px 0 #7a5900,
-                0 14px 26px rgba(0, 0, 0, 0.8),
-                0 0 34px rgba(212, 175, 55, 0.6);
-        }
+  .newgame-btn { padding: 14px 20px; font-size: 14px; }
+  .next-btn    { padding: 14px 40px; font-size: 16px; }
 
-        .next-btn:disabled {
-            opacity: 0.35;
-            cursor: default;
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #7a5900;
-        }
+  .btn-gold:hover:not(:disabled) {
+    background: linear-gradient(180deg, #ffe28c 0%, #e6bf3a 55%, #c9971b 100%);
+    transform: translateY(-2px);
+    box-shadow:
+      0 7px 0 #7a5900,
+      0 12px 22px rgba(0,0,0,.75),
+      0 0 30px rgba(212,175,55,.55);
+  }
 
-        .hint {
-            text-align: center;
-            font-size: 12.5px;
-            color: #6d8bb0;
-            letter-spacing: 0.8px;
-            margin-top: 14px;
-            position: relative;
-            z-index: 2;
-        }
+  .btn-gold:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 #7a5900;
+  }
 
-        .hint b {
-            color: #d4af37;
-        }
+  .btn-gold:disabled {
+    opacity: .35;
+    cursor: default;
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #7a5900;
+  }
 
-        @media (max-width: 620px) {
-            .game-container { padding: 16px 14px 22px; }
-            .logo { font-size: 15px; letter-spacing: 1px; }
-            .logo-star { font-size: 22px; }
-            .score-box { padding: 6px 16px; gap: 10px; }
-            .score-value { font-size: 24px; min-width: 70px; }
-            .category { font-size: 11px; letter-spacing: 0.3px; padding: 10px 3px; min-height: 58px; }
-            .cell { font-size: 22px; padding: 16px 3px; }
-            .question-text { font-size: 19px; }
-            .answer-btn { font-size: 15px; padding: 13px 16px; }
-        }
-    </style>
+  /* ===== Modal ===== */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(3,10,20,.88);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .22s ease, visibility .22s ease;
+    padding: 16px;
+  }
+
+  .modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .modal {
+    width: 680px;
+    max-width: 100%;
+    max-height: 94vh;
+    overflow-y: auto;
+    background: linear-gradient(160deg, #102238 0%, #162e4d 100%);
+    border: 2.5px solid var(--gold);
+    border-radius: 32px;
+    padding: 26px 32px 32px;
+    box-shadow:
+      0 25px 70px rgba(0,0,0,.9),
+      0 0 60px rgba(212,175,55,.22),
+      inset 0 0 40px rgba(20,50,90,.5);
+    transform: scale(.94);
+    transition: transform .18s ease;
+    position: relative;
+  }
+
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #fff 33.3%, #0039a6 33.3% 66.6%, #d52b1e 66.6%);
+    border-radius: 32px 32px 0 0;
+  }
+
+  .modal-overlay.active .modal { transform: scale(1); }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(212,175,55,.35);
+    color: var(--gold-light);
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .modal-header .cat-name {
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .modal-header .price-tag {
+    flex-shrink: 0;
+    background: #0a1626;
+    padding: 5px 18px;
+    border-radius: 40px;
+    border: 1.5px solid var(--gold);
+    color: #ffe28c;
+    font-size: 16px;
+  }
+
+  .timer {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+
+  .timer-ring {
+    position: relative;
+    width: 54px;
+    height: 54px;
+  }
+
+  .timer-ring svg { transform: rotate(-90deg); display: block; }
+
+  .timer-ring .bg { stroke: #0a1626; }
+  .timer-ring .fg {
+    stroke: var(--gold);
+    stroke-linecap: round;
+    transition: stroke-dashoffset .9s linear, stroke .3s ease;
+  }
+
+  .timer-ring.danger .fg { stroke: #ff5b5b; }
+  .timer-ring.danger { animation: shake .4s ease infinite; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25%     { transform: translateX(-2px); }
+    75%     { transform: translateX(2px); }
+  }
+
+  .timer-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 18px;
+    color: var(--gold-light);
+  }
+
+  .question-text {
+    font-size: 22px;
+    font-weight: 600;
+    color: #eef6ff;
+    line-height: 1.45;
+    margin-bottom: 24px;
+    text-align: center;
+    text-shadow: 0 2px 6px #000;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    word-break: break-word;
+  }
+
+  .answers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    margin-bottom: 14px;
+  }
+
+  .answer-btn {
+    background: linear-gradient(180deg, #1e3c5e 0%, #16304d 100%);
+    border: 1.5px solid #5f8bb0;
+    color: #dcecff;
+    padding: 15px 22px;
+    border-radius: 60px;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: transform .12s ease, background .12s ease,
+                border-color .12s ease, box-shadow .12s ease, color .12s ease;
+    box-shadow: 0 4px 0 #0a1728, 0 6px 12px rgba(0,0,0,.4);
+    letter-spacing: .3px;
+  }
+
+  .answer-btn:hover:not(:disabled) {
+    background: linear-gradient(180deg, #2c5580 0%, #204270 100%);
+    border-color: var(--gold);
+    color: #fff6d8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #0a1728, 0 10px 18px rgba(0,0,0,.55);
+  }
+
+  .answer-btn:focus-visible {
+    outline: 2px solid var(--gold-light);
+    outline-offset: 2px;
+  }
+
+  .answer-btn.correct {
+    background: linear-gradient(180deg, #1e7e34 0%, #14621f 100%);
+    border-color: #9bff9b;
+    color: #fff;
+    box-shadow: 0 4px 0 #0b2a12, 0 0 22px rgba(60,255,100,.4);
+    animation: popCorrect .35s ease;
+  }
+
+  @keyframes popCorrect {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.03); }
+    100% { transform: scale(1); }
+  }
+
+  .answer-btn.wrong {
+    background: linear-gradient(180deg, #992020 0%, #7a1414 100%);
+    border-color: #ff9e9e;
+    color: #fff;
+    box-shadow: 0 4px 0 #3d0a0a, 0 0 22px rgba(255,60,60,.35);
+    animation: popWrong .35s ease;
+  }
+
+  @keyframes popWrong {
+    0%,100% { transform: translateX(0); }
+    25%     { transform: translateX(-6px); }
+    75%     { transform: translateX(6px); }
+  }
+
+  .answer-btn:disabled { cursor: default; opacity: .9; }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  /* ===== Final screen ===== */
+  .final {
+    text-align: center;
+  }
+
+  .final-emoji {
+    font-size: 64px;
+    margin-bottom: 10px;
+    display: block;
+    animation: starPulse 2.5s ease-in-out infinite;
+  }
+
+  .final-title {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: linear-gradient(180deg, #fff, var(--gold));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 14px;
+  }
+
+  .final-score {
+    font-size: 52px;
+    font-weight: 900;
+    color: var(--gold-light);
+    text-shadow: 0 0 24px rgba(255,200,50,.8);
+    margin-bottom: 10px;
+  }
+
+  .final-text {
+    color: #c9d9ec;
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 980px) {
+    body { align-items: flex-start; overflow-y: auto; padding: 14px; }
+    .game-wrapper { flex-direction: column; height: auto; max-height: none; }
+    .panel-side { width: 100%; flex-direction: row; flex-wrap: wrap; }
+    .panel-card { flex: 1 1 45%; min-width: 150px; }
+    .logo-card, .score-card { flex: 1 1 45%; }
+    .progress-card, .tips-card { flex: 1 1 100%; }
+    .tips-card { display: none; }
+    .newgame-card { flex: 1 1 100%; margin-top: 0; }
+    .board { min-height: 480px; }
+    .logo-star { font-size: 34px; }
+    .logo-text { font-size: 16px; }
+    .score-value { font-size: 34px; }
+  }
+
+  @media (max-width: 600px) {
+    .board { gap: 8px; min-height: 400px; }
+    .category { font-size: 10px; padding: 6px 3px; min-height: 44px; letter-spacing: .2px; }
+    .cell { font-size: 20px; border-radius: var(--radius-sm); }
+    .modal { padding: 22px 18px 26px; border-radius: 24px; }
+    .question-text { font-size: 17px; min-height: 60px; }
+    .answer-btn { font-size: 14.5px; padding: 12px 16px; }
+    .next-btn { padding: 12px 28px; font-size: 14px; }
+    .modal-header { font-size: 14px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+  }
+</style>
 </head>
 <body>
-<div class="game-container">
-    <div class="header">
-        <div class="logo">
-            <span class="logo-star">★</span>
-            СВОЯ ИГРА · ПДД
-        </div>
-        <div class="score-box">
-            <span class="score-label">Счёт</span>
-            <span class="score-value" id="scoreDisplay">0</span>
-        </div>
+
+<div class="game-wrapper">
+  <!-- Игровое поле -->
+  <div class="board-side">
+    <div class="board-title">★ Игровое поле ★</div>
+    <div class="board" id="board" role="grid" aria-label="Игровое поле"></div>
+  </div>
+
+  <!-- Боковая панель -->
+  <div class="panel-side">
+    <div class="panel-card logo-card">
+      <span class="logo-star">★</span>
+      <div class="logo-text">Своя<br>Игра</div>
+      <div class="logo-sub">ПДД и Первая помощь</div>
     </div>
 
-    <div class="board" id="board"></div>
+    <div class="panel-card score-card">
+      <div class="score-label">Счёт</div>
+      <div class="score-value" id="scoreDisplay">0</div>
+    </div>
 
-    <div class="hint">Двойной клик по логотипу — <b>новая игра</b></div>
+    <div class="panel-card progress-card">
+      <div class="progress-title">
+        <span>Прогресс</span>
+        <span id="progressText">0 / 16</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <div class="panel-card tips-card">
+      <div class="tips-title">Как играть</div>
+      <div class="tip"><span class="tip-icon">▸</span><span>Выбери <b>клетку</b> на поле</span></div>
+      <div class="tip"><span class="tip-icon">▸</span><span>Успей ответить за <b>30 секунд</b></span></div>
+      <div class="tip"><span class="tip-icon">▸</span><span>Верно — <b>+очки</b>, неверно — <b>−очки</b></span></div>
+      <div class="tip"><span class="tip-icon">▸</span><span>Нажми <b>«Далее»</b> и продолжай</span></div>
+    </div>
+
+    <div class="panel-card newgame-card">
+      <button class="btn-gold newgame-btn" id="newGameBtn" type="button">↻ Новая игра</button>
+    </div>
+  </div>
 </div>
 
-<div class="modal-overlay" id="modalOverlay">
-    <div class="modal">
-        <div class="modal-header">
-            <span id="modalCategory">Категория</span>
-            <span id="modalPrice">100</span>
-        </div>
-        <div class="question-text" id="questionText">Текст вопроса</div>
-        <div class="answers-list" id="answersList"></div>
-        <div class="modal-footer">
-            <button class="next-btn" id="nextBtn" disabled>Далее</button>
-        </div>
+<!-- Модальное окно -->
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="questionText">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <span class="cat-name" id="modalCategory">Категория</span>
+      <span class="price-tag" id="modalPrice">100</span>
     </div>
+
+    <div class="timer" id="timerWrap">
+      <div class="timer-ring" id="timerRing">
+        <svg width="54" height="54" viewBox="0 0 54 54">
+          <circle class="bg" cx="27" cy="27" r="23" fill="none" stroke-width="5"></circle>
+          <circle class="fg" id="timerCircle" cx="27" cy="27" r="23" fill="none" stroke-width="5"
+                  stroke-dasharray="144.5" stroke-dashoffset="0"></circle>
+        </svg>
+        <div class="timer-text" id="timerText">30</div>
+      </div>
+    </div>
+
+    <div class="question-text" id="questionText">Текст вопроса</div>
+    <div class="answers-list" id="answersList"></div>
+    <div class="modal-footer">
+      <button class="btn-gold next-btn" id="nextBtn" type="button" disabled>Далее</button>
+    </div>
+  </div>
 </div>
 
 <script>
-    // ---------- 4 ТЕМЫ: ПДД + ПЕРВАЯ ПОМОЩЬ ----------
-    const categories = [
-        {
-            name: "Общие правила ПДД",
-            questions: [
-                { price: 100, question: "Какой сигнал светофора разрешает движение?", answers: ["Красный", "Жёлтый", "Зелёный", "Синий"], correct: 2 },
-                { price: 200, question: "Что означает жёлтый сигнал светофора?", answers: ["Можно ехать", "Приготовиться — скоро сменится", "Стой навсегда", "Пешеходам можно идти"], correct: 1 },
-                { price: 300, question: "С какого возраста детям разрешено ездить на велосипеде по проезжей части?", answers: ["С 7 лет", "С 10 лет", "С 14 лет", "С 18 лет"], correct: 2 },
-                { price: 400, question: "Что запрещено делать водителю, даже если очень спешит?", answers: ["Включать поворотник", "Превышать скорость", "Пристёгиваться", "Уступать пешеходам"], correct: 1 }
-            ]
-        },
-        {
-            name: "Правила для пешеходов",
-            questions: [
-                { price: 100, question: "Где пешеход должен переходить дорогу?", answers: ["В любом месте", "По пешеходному переходу", "На красный свет", "Между машинами"], correct: 1 },
-                { price: 200, question: "Что нужно сделать перед переходом дороги?", answers: ["Побежать", "Посмотреть по сторонам", "Закрыть глаза", "Помахать рукой"], correct: 1 },
-                { price: 300, question: "Как называется переход со светофором?", answers: ["Нерегулируемый", "Регулируемый", "Подземный", "Надземный"], correct: 1 },
-                { price: 400, question: "Можно ли отвлекаться на телефон при переходе дороги?", answers: ["Да, если быстро", "Да, если дорога пустая", "Нет, это опасно", "Только в наушниках"], correct: 2 }
-            ]
-        },
-        {
-            name: "Питбайки и мото",
-            questions: [
-                { price: 100, question: "С какого возраста можно ездить на питбайке по дорогам общего пользования?", answers: ["С 10 лет", "С 14 лет", "С 16 лет", "Запрещено без прав"], correct: 3 },
-                { price: 200, question: "Что обязательно нужно надеть при езде на питбайке?", answers: ["Кепку", "Шлем", "Очки", "Перчатки"], correct: 1 },
-                { price: 300, question: "Где можно безопасно кататься на питбайке?", answers: ["На трассе", "Во дворе", "На специальной площадке", "На тротуаре"], correct: 2 },
-                { price: 400, question: "Что нужно иметь для управления питбайком по дорогам?", answers: ["Ничего", "Права категории M или A", "Только шлем", "Разрешение родителей"], correct: 1 }
-            ]
-        },
-        {
-            name: "Первая помощь",
-            questions: [
-                { price: 100, question: "Какой номер нужно набрать, чтобы вызвать скорую помощь?", answers: ["101", "102", "103", "112"], correct: 2 },
-                { price: 200, question: "Что нужно сделать в первую очередь при ДТП?", answers: ["Сфотографировать", "Вызвать скорую и ГИБДД", "Уехать", "Заснять видео"], correct: 1 },
-                { price: 300, question: "Как остановить сильное кровотечение из раны?", answers: ["Полить водой", "Наложить жгут или давящую повязку", "Заклеить пластырем", "Подуть на рану"], correct: 1 },
-                { price: 400, question: "Что делать, если человек без сознания и не дышит?", answers: ["Дать воды", "Сделать искусственное дыхание и массаж сердца", "Усадить его", "Ждать скорую"], correct: 1 }
-            ]
-        }
-    ];
+(() => {
+  'use strict';
 
-    let score = 0;
-    let answeredCells = new Set();
-    let currentQuestion = null;
-
-    const boardEl = document.getElementById('board');
-    const scoreDisplay = document.getElementById('scoreDisplay');
-    const modalOverlay = document.getElementById('modalOverlay');
-    const modalCategory = document.getElementById('modalCategory');
-    const modalPrice = document.getElementById('modalPrice');
-    const questionText = document.getElementById('questionText');
-    const answersList = document.getElementById('answersList');
-    const nextBtn = document.getElementById('nextBtn');
-
-    function renderBoard() {
-        boardEl.innerHTML = '';
-
-        categories.forEach(cat => {
-            const catDiv = document.createElement('div');
-            catDiv.className = 'category';
-            catDiv.textContent = cat.name;
-            boardEl.appendChild(catDiv);
-        });
-
-        for (let row = 0; row < 4; row++) {
-            for (let col = 0; col < categories.length; col++) {
-                const question = categories[col].questions[row];
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                const cellId = `${row}-${col}`;
-
-                if (answeredCells.has(cellId)) {
-                    cell.classList.add('answered');
-                } else {
-                    cell.innerHTML = `<span>${question.price}</span>`;
-                }
-
-                cell.addEventListener('click', () => {
-                    if (answeredCells.has(cellId)) return;
-                    openQuestion(row, col);
-                });
-
-                boardEl.appendChild(cell);
-            }
-        }
+  /* ============ ДАННЫЕ ============ */
+  const CATEGORIES = [
+    {
+      name: 'Общие правила ПДД',
+      questions: [
+        { price: 100, question: 'Какой сигнал светофора разрешает движение?',
+          answers: ['Красный', 'Жёлтый', 'Зелёный', 'Синий'], correct: 2 },
+        { price: 200, question: 'Что означает жёлтый сигнал светофора?',
+          answers: ['Можно ехать', 'Приготовиться — скоро сменится', 'Стой навсегда', 'Пешеходам можно идти'], correct: 1 },
+        { price: 300, question: 'С какого возраста детям разрешено ездить на велосипеде по проезжей части?',
+          answers: ['С 7 лет', 'С 10 лет', 'С 14 лет', 'С 18 лет'], correct: 2 },
+        { price: 400, question: 'Что запрещено делать водителю, даже если очень спешит?',
+          answers: ['Включать поворотник', 'Превышать скорость', 'Пристёгиваться', 'Уступать пешеходам'], correct: 1 }
+      ]
+    },
+    {
+      name: 'Правила для пешеходов',
+      questions: [
+        { price: 100, question: 'Где пешеход должен переходить дорогу?',
+          answers: ['В любом месте', 'По пешеходному переходу', 'На красный свет', 'Между машинами'], correct: 1 },
+        { price: 200, question: 'Что нужно сделать перед переходом дороги?',
+          answers: ['Побежать', 'Посмотреть по сторонам', 'Закрыть глаза', 'Помахать рукой'], correct: 1 },
+        { price: 300, question: 'Как называется переход со светофором?',
+          answers: ['Нерегулируемый', 'Регулируемый', 'Подземный', 'Надземный'], correct: 1 },
+        { price: 400, question: 'Можно ли отвлекаться на телефон при переходе дороги?',
+          answers: ['Да, если быстро', 'Да, если дорога пустая', 'Нет, это опасно', 'Только в наушниках'], correct: 2 }
+      ]
+    },
+    {
+      name: 'Питбайки и мото',
+      questions: [
+        { price: 100, question: 'С какого возраста можно ездить на питбайке по дорогам общего пользования?',
+          answers: ['С 10 лет', 'С 14 лет', 'С 16 лет', 'Запрещено без прав'], correct: 3 },
+        { price: 200, question: 'Что обязательно нужно надеть при езде на питбайке?',
+          answers: ['Кепку', 'Шлем', 'Очки', 'Перчатки'], correct: 1 },
+        { price: 300, question: 'Где можно безопасно кататься на питбайке?',
+          answers: ['На трассе', 'Во дворе', 'На специальной площадке', 'На тротуаре'], correct: 2 },
+        { price: 400, question: 'Что нужно иметь для управления питбайком по дорогам?',
+          answers: ['Ничего', 'Права категории M или A', 'Только шлем', 'Разрешение родителей'], correct: 1 }
+      ]
+    },
+    {
+      name: 'Первая помощь',
+      questions: [
+        { price: 100, question: 'Какой номер нужно набрать, чтобы вызвать скорую помощь?',
+          answers: ['101', '102', '103', '112'], correct: 2 },
+        { price: 200, question: 'Что нужно сделать в первую очередь при ДТП?',
+          answers: ['Сфотографировать', 'Вызвать скорую и ГИБДД', 'Уехать', 'Снять видео'], correct: 1 },
+        { price: 300, question: 'Как остановить сильное кровотечение из раны?',
+          answers: ['Полить водой', 'Наложить жгут или давящую повязку', 'Заклеить пластырем', 'Подуть на рану'], correct: 1 },
+        { price: 400, question: 'Что делать, если человек без сознания и не дышит?',
+          answers: ['Дать воды', 'Сделать искусственное дыхание и массаж сердца', 'Усадить его', 'Ждать скорую'], correct: 1 }
+      ]
     }
+  ];
 
-    function openQuestion(row, col) {
-        const category = categories[col];
-        const question = category.questions[row];
+  const TOTAL_CELLS = CATEGORIES.length * 4;
+  const TIME_LIMIT = 30;
 
-        currentQuestion = {
-            row, col,
-            price: question.price,
-            question: question.question,
-            answers: question.answers,
-            correct: question.correct,
-            answered: false
+  /* ============ СОСТОЯНИЕ ============ */
+  const state = {
+    score: 0,
+    answered: new Set(),
+    current: null,
+    timerId: null,
+    timeLeft: TIME_LIMIT,
+    locked: false
+  };
+
+  /* ============ DOM ============ */
+  const $ = (id) => document.getElementById(id);
+  const boardEl       = $('board');
+  const scoreDisplay  = $('scoreDisplay');
+  const progressFill  = $('progressFill');
+  const progressText  = $('progressText');
+  const modalOverlay  = $('modalOverlay');
+  const modalCategory = $('modalCategory');
+  const modalPrice    = $('modalPrice');
+  const questionText  = $('questionText');
+  const answersList   = $('answersList');
+  const nextBtn       = $('nextBtn');
+  const newGameBtn    = $('newGameBtn');
+  const timerWrap     = $('timerWrap');
+  const timerRing     = $('timerRing');
+  const timerCircle   = $('timerCircle');
+  const timerText     = $('timerText');
+
+  const CIRCUMFERENCE = 2 * Math.PI * 23; // r=23
+
+  /* ============ ЗВУК (Web Audio, без файлов) ============ */
+  const Sound = (() => {
+    let ctx = null;
+    const init = () => {
+      if (!ctx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) ctx = new AC();
+      }
+      if (ctx && ctx.state === 'suspended') ctx.resume();
+    };
+    const beep = (freq, dur = 0.12, type = 'sine', gain = 0.08) => {
+      try {
+        init();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        g.gain.value = gain;
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
+        osc.connect(g).connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + dur);
+      } catch (_) {}
+    };
+    return {
+      correct: () => { beep(660, .12); setTimeout(() => beep(880, .18), 110); },
+      wrong:   () => { beep(220, .22, 'sawtooth', .07); },
+      tick:    () => beep(880, .04, 'square', .025),
+      end:     () => { beep(523, .14); setTimeout(() => beep(659, .14), 140); setTimeout(() => beep(784, .24), 280); },
+      unlock:  init
+    };
+  })();
+
+  /* ============ RENDER ============ */
+  function renderBoard() {
+    const frag = document.createDocumentFragment();
+
+    CATEGORIES.forEach(cat => {
+      const d = document.createElement('div');
+      d.className = 'category';
+      d.textContent = cat.name;
+      d.setAttribute('role', 'columnheader');
+      frag.appendChild(d);
+    });
+
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < CATEGORIES.length; col++) {
+        const q = CATEGORIES[col].questions[row];
+        const id = `${row}-${col}`;
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.id = id;
+        cell.setAttribute('role', 'gridcell');
+        cell.setAttribute('tabindex', '0');
+
+        if (state.answered.has(id)) {
+          cell.classList.add('answered');
+          cell.setAttribute('aria-disabled', 'true');
+        } else {
+          cell.innerHTML = `<span>${q.price}</span>`;
+          cell.setAttribute('aria-label', `${CATEGORIES[col].name}, ${q.price} очков`);
+        }
+
+        const activate = () => {
+          Sound.unlock();
+          if (state.answered.has(id)) return;
+          openQuestion(row, col);
         };
 
-        modalCategory.textContent = category.name;
-        modalPrice.textContent = question.price;
-        questionText.textContent = question.question;
-
-        answersList.innerHTML = '';
-        question.answers.forEach((answer, idx) => {
-            const btn = document.createElement('button');
-            btn.className = 'answer-btn';
-            btn.textContent = answer;
-            btn.dataset.index = idx;
-            btn.addEventListener('click', () => selectAnswer(idx, btn));
-            answersList.appendChild(btn);
+        cell.addEventListener('click', activate);
+        cell.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
         });
 
-        nextBtn.disabled = true;
-        nextBtn.textContent = 'Далее';
-
-        modalOverlay.classList.add('active');
-        window.currentAnswerButtons = Array.from(answersList.children);
+        frag.appendChild(cell);
+      }
     }
 
-    function selectAnswer(selectedIndex, btnEl) {
-        if (!currentQuestion || currentQuestion.answered) return;
+    boardEl.innerHTML = '';
+    boardEl.appendChild(frag);
+    updateProgress();
+  }
 
-        const allButtons = window.currentAnswerButtons;
-        const correctIndex = currentQuestion.correct;
+  function updateScore() {
+    scoreDisplay.textContent = state.score;
+  }
 
-        allButtons.forEach(btn => btn.disabled = true);
-        allButtons[correctIndex].classList.add('correct');
+  function updateProgress() {
+    const done = state.answered.size;
+    progressText.textContent = `${done} / ${TOTAL_CELLS}`;
+    progressFill.style.width = `${(done / TOTAL_CELLS) * 100}%`;
+  }
 
-        if (selectedIndex === correctIndex) {
-            score += currentQuestion.price;
-            scoreDisplay.textContent = score;
-        } else {
-            score -= currentQuestion.price;
-            scoreDisplay.textContent = score;
-            btnEl.classList.add('wrong');
-        }
+  /* ============ TIMER ============ */
+  function startTimer() {
+    stopTimer();
+    state.timeLeft = TIME_LIMIT;
+    updateTimerUI();
 
-        currentQuestion.answered = true;
-        nextBtn.disabled = false;
+    state.timerId = setInterval(() => {
+      state.timeLeft -= 1;
+      updateTimerUI();
+
+      if (state.timeLeft <= 5 && state.timeLeft > 0) Sound.tick();
+
+      if (state.timeLeft <= 0) {
+        stopTimer();
+        timeOut();
+      }
+    }, 1000);
+  }
+
+  function stopTimer() {
+    if (state.timerId) {
+      clearInterval(state.timerId);
+      state.timerId = null;
     }
+  }
 
-    function closeQuestion() {
-        if (!currentQuestion) return;
-        answeredCells.add(`${currentQuestion.row}-${currentQuestion.col}`);
-        renderBoard();
-        modalOverlay.classList.remove('active');
-        currentQuestion = null;
+  function updateTimerUI() {
+    const t = Math.max(0, state.timeLeft);
+    timerText.textContent = t;
+    const offset = CIRCUMFERENCE * (1 - t / TIME_LIMIT);
+    timerCircle.style.strokeDasharray = CIRCUMFERENCE;
+    timerCircle.style.strokeDashoffset = offset;
 
-        if (answeredCells.size === 16) {
-            setTimeout(() => {
-                const msg = score >= 0
-                    ? `Молодец! Ты знаешь ПДД и первую помощь! Итоговый счёт: ${score}`
-                    : `Игра завершена. Итоговый счёт: ${score}. Повтори правила!`;
-                alert(msg);
-            }, 150);
-        }
-    }
+    if (t <= 5) timerRing.classList.add('danger');
+    else timerRing.classList.remove('danger');
+  }
 
-    function resetGame() {
-        score = 0;
-        answeredCells.clear();
-        currentQuestion = null;
-        scoreDisplay.textContent = '0';
-        renderBoard();
-        modalOverlay.classList.remove('active');
-    }
+  function resetTimerUI() {
+    timerRing.classList.remove('danger');
+    timerText.textContent = TIME_LIMIT;
+    timerCircle.style.strokeDashoffset = 0;
+  }
 
-    nextBtn.addEventListener('click', closeQuestion);
+  /* ============ QUESTION FLOW ============ */
+  function openQuestion(row, col) {
+    const category = CATEGORIES[col];
+    const q = category.questions[row];
 
-    modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay && currentQuestion && currentQuestion.answered) {
-            closeQuestion();
-        }
+    state.current = {
+      row, col,
+      price: q.price,
+      correct: q.correct,
+      answered: false
+    };
+    state.locked = false;
+
+    modalCategory.textContent = category.name;
+    modalPrice.textContent = q.price;
+    questionText.textContent = q.question;
+
+    answersList.innerHTML = '';
+    q.answers.forEach((text, idx) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'answer-btn';
+      btn.textContent = text;
+      btn.dataset.index = idx;
+      btn.addEventListener('click', () => selectAnswer(idx, btn));
+      answersList.appendChild(btn);
     });
 
-    document.querySelector('.logo').addEventListener('dblclick', () => {
-        if (confirm('Начать новую игру? Текущий прогресс будет сброшен.')) {
-            resetGame();
-        }
-    });
+    nextBtn.disabled = true;
+    nextBtn.textContent = 'Далее';
+
+    timerWrap.style.display = '';
+    resetTimerUI();
+    startTimer();
+
+    modalOverlay.classList.add('active');
+    modalOverlay.setAttribute('aria-hidden', 'false');
+
+    // фокус на первую кнопку
+    setTimeout(() => {
+      const first = answersList.querySelector('.answer-btn');
+      if (first) first.focus();
+    }, 60);
+  }
+
+  function getAnswerButtons() {
+    return Array.from(answersList.querySelectorAll('.answer-btn'));
+  }
+
+  function selectAnswer(selectedIndex, btnEl) {
+    if (!state.current || state.current.answered || state.locked) return;
+
+    state.locked = true;
+    stopTimer();
+
+    const buttons = getAnswerButtons();
+    const correctIndex = state.current.correct;
+
+    buttons.forEach(b => b.disabled = true);
+    buttons[correctIndex].classList.add('correct');
+
+    if (selectedIndex === correctIndex) {
+      state.score += state.current.price;
+      Sound.correct();
+    } else {
+      state.score -= state.current.price;
+      btnEl.classList.add('wrong');
+      Sound.wrong();
+    }
+
+    updateScore();
+    state.current.answered = true;
+    nextBtn.disabled = false;
+    nextBtn.focus();
+  }
+
+  function timeOut() {
+    if (!state.current || state.current.answered) return;
+
+    state.locked = true;
+    const buttons = getAnswerButtons();
+    const correctIndex = state.current.correct;
+
+    buttons.forEach(b => b.disabled = true);
+    buttons[correctIndex].classList.add('correct');
+
+    state.score -= state.current.price;
+    updateScore();
+    Sound.wrong();
+
+    state.current.answered = true;
+    nextBtn.disabled = false;
+    nextBtn.focus();
+  }
+
+  function closeQuestion() {
+    if (!state.current) return;
+
+    stopTimer();
+    state.answered.add(`${state.current.row}-${state.current.col}`);
+    state.current = null;
+
+    modalOverlay.classList.remove('active');
+    modalOverlay.setAttribute('aria-hidden', 'true');
 
     renderBoard();
+
+    if (state.answered.size === TOTAL_CELLS) {
+      setTimeout(showFinalScreen, 300);
+    }
+  }
+
+  function showFinalScreen() {
+    Sound.end();
+
+    const isGood = state.score >= 0;
+    modalCategory.textContent = 'Игра завершена';
+    modalPrice.textContent = '★';
+    timerWrap.style.display = 'none';
+
+    questionText.innerHTML = `
+      <div class="final">
+        <span class="final-emoji">${isGood ? '🏆' : '📚'}</span>
+        <div class="final-title">${isGood ? 'Отличный результат!' : 'Есть над чем поработать'}</div>
+        <div class="final-score">${state.score}</div>
+        <div class="final-text">
+          ${isGood
+            ? 'Ты хорошо знаешь ПДД и основы первой помощи.'
+            : 'Повтори правила дорожного движения и основы первой помощи.'}
+        </div>
+      </div>
+    `;
+
+    answersList.innerHTML = '';
+    nextBtn.disabled = false;
+    nextBtn.textContent = 'Новая игра';
+    nextBtn.onclick = () => {
+      nextBtn.onclick = null;
+      resetGame();
+    };
+
+    modalOverlay.classList.add('active');
+    modalOverlay.setAttribute('aria-hidden', 'false');
+    nextBtn.focus();
+  }
+
+  /* ============ RESET ============ */
+  function resetGame() {
+    stopTimer();
+    state.score = 0;
+    state.answered.clear();
+    state.current = null;
+    state.locked = false;
+
+    updateScore();
+    renderBoard();
+
+    modalOverlay.classList.remove('active');
+    modalOverlay.setAttribute('aria-hidden', 'true');
+
+    // восстановим дефолтный футер
+    nextBtn.onclick = null;
+    nextBtn.textContent = 'Далее';
+    nextBtn.disabled = true;
+    timerWrap.style.display = '';
+    resetTimerUI();
+  }
+
+  /* ============ EVENTS ============ */
+  nextBtn.addEventListener('click', () => {
+    if (nextBtn.textContent === 'Далее') closeQuestion();
+  });
+
+  modalOverlay.addEventListener('click', (e) => {
+    if (e.target === modalOverlay && state.current && state.current.answered) {
+      closeQuestion();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && state.current && state.current.answered) {
+      closeQuestion();
+    }
+    if (e.key === 'Enter' && !nextBtn.disabled && modalOverlay.classList.contains('active')) {
+      if (nextBtn.textContent === 'Далее') closeQuestion();
+    }
+  });
+
+  newGameBtn.addEventListener('click', () => {
+    Sound.unlock();
+    if (state.answered.size === 0 && state.score === 0) return;
+    if (confirm('Начать новую игру? Текущий прогресс будет сброшен.')) {
+      resetGame();
+    }
+  });
+
+  /* ============ INIT ============ */
+  resetTimerUI();
+  renderBoard();
+  updateScore();
+  modalOverlay.setAttribute('aria-hidden', 'true');
+})();
 </script>
 </body>
 </html>
